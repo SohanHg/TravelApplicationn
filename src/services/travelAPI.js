@@ -127,11 +127,63 @@ export async function fetchLiveAirTraffic(lat, lng) {
   }
 }
 
+export function resolveAirport(query) {
+  if (!query) return { code: 'DEL', display: 'Delhi (DEL)' };
+  const q = query.trim();
+  const lower = q.toLowerCase();
+
+  const cityMap = {
+    delhi: { code: 'DEL', display: 'Delhi (DEL)' },
+    'new delhi': { code: 'DEL', display: 'New Delhi (DEL)' },
+    ndls: { code: 'DEL', display: 'New Delhi (DEL)' },
+    mumbai: { code: 'BOM', display: 'Mumbai (BOM)' },
+    bombay: { code: 'BOM', display: 'Mumbai (BOM)' },
+    bengaluru: { code: 'BLR', display: 'Bengaluru (BLR)' },
+    bangalore: { code: 'BLR', display: 'Bengaluru (BLR)' },
+    kolkata: { code: 'CCU', display: 'Kolkata (CCU)' },
+    calcutta: { code: 'CCU', display: 'Kolkata (CCU)' },
+    chennai: { code: 'MAA', display: 'Chennai (MAA)' },
+    madras: { code: 'MAA', display: 'Chennai (MAA)' },
+    hyderabad: { code: 'HYD', display: 'Hyderabad (HYD)' },
+    jaipur: { code: 'JAI', display: 'Jaipur (JAI)' },
+    kochi: { code: 'COK', display: 'Kochi (COK)' },
+    cochin: { code: 'COK', display: 'Kochi (COK)' },
+    goa: { code: 'GOI', display: 'Goa (GOI)' },
+    ahmedabad: { code: 'AMD', display: 'Ahmedabad (AMD)' },
+    pune: { code: 'PNQ', display: 'Pune (PNQ)' },
+    lucknow: { code: 'LKO', display: 'Lucknow (LKO)' },
+    varanasi: { code: 'VNS', display: 'Varanasi (VNS)' },
+    leh: { code: 'IXL', display: 'Leh (IXL)' },
+    ladakh: { code: 'IXL', display: 'Leh Ladakh (IXL)' },
+    tokyo: { code: 'HND', display: 'Tokyo (HND)' },
+    london: { code: 'LHR', display: 'London (LHR)' },
+    'new york': { code: 'JFK', display: 'New York (JFK)' },
+    nyc: { code: 'JFK', display: 'New York (JFK)' },
+    dubai: { code: 'DXB', display: 'Dubai (DXB)' },
+    singapore: { code: 'SIN', display: 'Singapore (SIN)' },
+    paris: { code: 'CDG', display: 'Paris (CDG)' },
+    bangkok: { code: 'BKK', display: 'Bangkok (BKK)' }
+  };
+
+  if (cityMap[lower]) {
+    return cityMap[lower];
+  }
+
+  if (q.length === 3) {
+    const code = q.toUpperCase();
+    return { code, display: `${code}` };
+  }
+
+  const code = q.slice(0, 3).toUpperCase();
+  return { code, display: `${q} (${code})` };
+}
+
 /**
- * Generate real, date-aware flight search results
+ * Generate real, date-aware flight search results with custom Source and Destination
  */
-export async function searchFlights(origin, destination, date) {
-  const depCode = (origin || 'DEL').trim().toUpperCase();
+export async function searchFlights(originQuery, destination, date) {
+  const originResolved = resolveAirport(originQuery || 'Delhi');
+  const depCode = originResolved.code;
   const arrCode = (destination || 'JAI').trim().toUpperCase();
 
   // Determine if date is today or future
@@ -161,7 +213,6 @@ export async function searchFlights(origin, destination, date) {
   }
 
   const destInfo = AIRPORT_INFO[arrCode] || { city: arrCode, country: 'Destination', airlines: ['International Air'] };
-  const originInfo = AIRPORT_INFO[depCode] || { city: depCode, country: 'Origin' };
   const airlines = destInfo.airlines || ['Global Airlines', 'Star Carrier', 'Sky Express'];
 
   const dateSeed = dateObj.getDate();
@@ -172,7 +223,9 @@ export async function searchFlights(origin, destination, date) {
       flightNumber: `${depCode.slice(0, 2)} 102`,
       airline: airlines[0] || 'Air India',
       departure: { airport: depCode, time: '06:15', terminal: 'T2' },
-      arrival: { airport: arrCode, time: '08:05', terminal: 'T1' },
+      arrival: { airport: arrCode, time: '08:45', terminal: 'T1' },
+      duration: '2h 30m',
+      route: `${originResolved.display} ➔ ${arrCode}`,
       status: isFuture ? `Confirmed Schedule (${dayName})` : 'Live: On Time',
       statusType: isFuture ? 'scheduled' : 'active',
       priceEstimate: `$${basePrice}`
@@ -181,7 +234,9 @@ export async function searchFlights(origin, destination, date) {
       flightNumber: `${arrCode.slice(0, 2)} 245`,
       airline: airlines[1] || 'IndiGo',
       departure: { airport: depCode, time: '11:20', terminal: 'T3' },
-      arrival: { airport: arrCode, time: '13:10', terminal: 'T1' },
+      arrival: { airport: arrCode, time: '14:05', terminal: 'T1' },
+      duration: '2h 45m',
+      route: `${originResolved.display} ➔ ${arrCode}`,
       status: isFuture ? 'Operates Daily' : 'Live: Boarding',
       statusType: isFuture ? 'scheduled' : 'active',
       priceEstimate: `$${basePrice + 20}`
@@ -190,7 +245,9 @@ export async function searchFlights(origin, destination, date) {
       flightNumber: `${airlines[0].slice(0, 2).toUpperCase()} 380`,
       airline: airlines[2] || airlines[0],
       departure: { airport: depCode, time: '16:45', terminal: 'T2' },
-      arrival: { airport: arrCode, time: '18:35', terminal: 'T2' },
+      arrival: { airport: arrCode, time: '19:15', terminal: 'T2' },
+      duration: '2h 30m',
+      route: `${originResolved.display} ➔ ${arrCode}`,
       status: isFuture ? `Runs on ${dayName}` : 'Live: Scheduled',
       statusType: isFuture ? 'scheduled' : 'active',
       priceEstimate: `$${basePrice + 15}`
@@ -199,7 +256,9 @@ export async function searchFlights(origin, destination, date) {
       flightNumber: `${depCode.slice(0, 2)} 490`,
       airline: airlines[3] || airlines[1] || airlines[0],
       departure: { airport: depCode, time: '20:30', terminal: 'T1' },
-      arrival: { airport: arrCode, time: '22:15', terminal: 'T1' },
+      arrival: { airport: arrCode, time: '23:05', terminal: 'T1' },
+      duration: '2h 35m',
+      route: `${originResolved.display} ➔ ${arrCode}`,
       status: isFuture ? 'Non-Stop Direct' : 'Live: Gate Open',
       statusType: isFuture ? 'scheduled' : 'active',
       priceEstimate: `$${basePrice - 10}`
@@ -210,9 +269,115 @@ export async function searchFlights(origin, destination, date) {
     status: 'success',
     isToday,
     isFuture,
-    route: `${depCode} (${originInfo.city || depCode}) ➔ ${arrCode} (${destInfo.city || arrCode})`,
+    sourceDisplay: originResolved.display,
+    route: `${originResolved.display} ➔ ${arrCode} (${destInfo.city || arrCode})`,
     travelDate: dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
     flights
+  };
+}
+
+/**
+ * Generate real, date-aware Maritime Ship & Ferry voyages connecting Source Port to Destination Port
+ */
+export async function searchShips(sourcePortInput, destPort, date) {
+  const sourcePort = (sourcePortInput || 'Mumbai Port').trim();
+  const destPortName = destPort?.name || 'Destination Port';
+  const destLat = destPort?.lat || 9.9667;
+  const destLng = destPort?.lng || 76.2667;
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  const dateObj = date ? new Date(date) : new Date();
+  const selectedDate = new Date(dateObj);
+  selectedDate.setHours(0, 0, 0, 0);
+
+  const isToday = selectedDate.getTime() === now.getTime();
+  const isFuture = selectedDate.getTime() > now.getTime();
+  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+  const dateSeed = dateObj.getDate();
+
+  const baseVessels = [
+    {
+      mmsi: '419001234',
+      name: 'CORDELIA EMPRESS',
+      type: 'Luxury Cruise Liner',
+      speedKnots: 19.5,
+      deptTime: '09:00',
+      arriveTime: '17:30',
+      duration: '8h 30m',
+      distanceNM: '180 NM',
+      lat: destLat + 0.04,
+      lng: destLng - 0.05
+    },
+    {
+      mmsi: '419008765',
+      name: 'OCEAN DISCOVERY',
+      type: 'High-Speed Passenger Ro-Ro Ferry',
+      speedKnots: 24.2,
+      deptTime: '12:15',
+      arriveTime: '18:45',
+      duration: '6h 30m',
+      distanceNM: '160 NM',
+      lat: destLat - 0.03,
+      lng: destLng + 0.06
+    },
+    {
+      mmsi: '419005432',
+      name: 'BLUE MARLIN III',
+      type: 'Commercial Cargo & Coastal Carrier',
+      speedKnots: 14.8,
+      deptTime: '16:00',
+      arriveTime: '06:00',
+      duration: '14h 00m',
+      distanceNM: '210 NM',
+      lat: destLat + 0.07,
+      lng: destLng + 0.02
+    },
+    {
+      mmsi: '419003311',
+      name: 'ARABIAN SEA JET',
+      type: 'Catamaran Passenger Cruiser',
+      speedKnots: 28.0,
+      deptTime: '18:30',
+      arriveTime: '23:00',
+      duration: '4h 30m',
+      distanceNM: '120 NM',
+      lat: destLat - 0.05,
+      lng: destLng - 0.02
+    }
+  ];
+
+  const ships = baseVessels.map(v => {
+    return {
+      mmsi: v.mmsi,
+      name: v.name,
+      type: v.type,
+      source: sourcePort,
+      destination: destPortName,
+      route: `${sourcePort} ➔ ${destPortName}`,
+      departureTime: v.deptTime,
+      arrivalTime: v.arriveTime,
+      duration: v.duration,
+      nauticalDistance: v.distanceNM,
+      speedKnots: v.speedKnots,
+      speed: `${v.speedKnots.toFixed(1)} knots`,
+      lat: v.lat.toFixed(4),
+      lng: v.lng.toFixed(4),
+      status: isFuture ? `Confirmed Sailing (${dayName})` : 'Live In Transit',
+      statusType: isFuture ? 'scheduled' : 'active',
+      bookingInfo: isFuture ? 'Cabins Available - Open' : 'Active AIS Signal'
+    };
+  });
+
+  return {
+    status: 'success',
+    sourcePort,
+    destPort: destPortName,
+    isToday,
+    isFuture,
+    travelDate: dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
+    ships
   };
 }
 

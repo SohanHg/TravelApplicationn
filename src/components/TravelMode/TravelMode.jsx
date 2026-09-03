@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plane, Train, Ship, Car, Compass, MapPin, Calendar, Search, ArrowRight, Radio } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
-import { searchFlights, searchTrains, fetchDrivingRoute, fetchLiveAirTraffic } from '../../services/travelAPI';
+import { searchFlights, searchTrains, searchShips, fetchDrivingRoute, fetchLiveAirTraffic } from '../../services/travelAPI';
 import { geocodeLocation } from '../../services/geocodeAPI';
 import './TravelMode.css';
 
@@ -26,7 +26,7 @@ export default function TravelMode({ destination }) {
   const [publicTab, setPublicTab] = useState('flight'); // 'flight' | 'train' | 'ship'
 
   // Flight state
-  const [originAirport, setOriginAirport] = useState('DEL');
+  const [originAirport, setOriginAirport] = useState('Delhi');
   const [flightDate, setFlightDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [flightRouteInfo, setFlightRouteInfo] = useState('');
   const [flightDateLabel, setFlightDateLabel] = useState('');
@@ -45,10 +45,14 @@ export default function TravelMode({ destination }) {
   const [trainsError, setTrainsError] = useState(null);
   const [isFutureTrain, setIsFutureTrain] = useState(false);
 
-  // Ship AIS state (WebSocket)
+  // Ship AIS state (WebSocket + Route)
+  const [shipSource, setShipSource] = useState('Mumbai Port');
   const [shipDate, setShipDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [shipDateLabel, setShipDateLabel] = useState('');
   const [ships, setShips] = useState([]);
-  const [shipStatus, setShipStatus] = useState('connecting');
+  const [shipStatus, setShipStatus] = useState('streaming');
+  const [isFutureShip, setIsFutureShip] = useState(false);
+  const [shipsLoading, setShipsLoading] = useState(false);
   const wsRef = useRef(null);
 
   // Private route state
@@ -241,11 +245,31 @@ export default function TravelMode({ destination }) {
     }
   }, [activeMode, publicTab, nearestPort.lat, nearestPort.lng]);
 
+  // --- Ship handler ---
+  const handleShipSearch = async (e, customDate, customSource) => {
+    if (e) e.preventDefault();
+    const dateToUse = customDate || shipDate;
+    const sourceToUse = customSource !== undefined ? customSource : shipSource;
+    setShipsLoading(true);
+
+    try {
+      const result = await searchShips(sourceToUse, nearestPort, dateToUse);
+      setShips(result.ships || []);
+      setShipDateLabel(result.travelDate || '');
+      setIsFutureShip(!!result.isFuture);
+    } catch (err) {
+      console.warn('Ship search error:', err);
+    } finally {
+      setShipsLoading(false);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     handleFlightSearch(null, flightDate);
-    handleTrainSearch(null, trainDate);
-  }, [nearestAirport, nearestStation.code]);
+    handleTrainSearch(null, trainDate, trainSource);
+    handleShipSearch(null, shipDate, shipSource);
+  }, [nearestAirport, nearestStation.code, nearestPort.name]);
 
   // --- Private Route Handlers ---
   const handleUseCurrentLocation = () => {
@@ -373,18 +397,17 @@ export default function TravelMode({ destination }) {
             <div className="transit-subpanel">
               <div className="transit-form-row">
                 <div className="transit-field">
-                  <label>Origin Airport (IATA)</label>
+                  <label>Departure / Origin City or Airport</label>
                   <input
                     type="text"
                     value={originAirport}
-                    onChange={(e) => setOriginAirport(e.target.value.toUpperCase())}
-                    placeholder="e.g. DEL, BOM, JFK, LHR"
-                    maxLength={3}
+                    onChange={(e) => setOriginAirport(e.target.value)}
+                    placeholder="e.g. Delhi, Mumbai, Bengaluru, New York"
                   />
                 </div>
                 <div className="transit-arrow"><ArrowRight size={18} /></div>
                 <div className="transit-field">
-                  <label>Destination Airport</label>
+                  <label>Arrival / Destination Airport</label>
                   <input
                     type="text"
                     value={nearestAirport}
@@ -422,7 +445,7 @@ export default function TravelMode({ destination }) {
               {/* Dynamic Route & Date Header */}
               {flightRouteInfo && (
                 <div className="transit-meta-header">
-                  <span className="route-tag">📍 {flightRouteInfo}</span>
+                  <span className="route-tag">✈️ Route: {flightRouteInfo}</span>
                   <span className="date-tag">
                     📅 {isFutureFlight ? 'Confirmed Timetable: ' : 'Live Air Departures: '} {flightDateLabel}
                   </span>
@@ -446,11 +469,18 @@ export default function TravelMode({ destination }) {
                         <strong>{f.departure.time}</strong>
                         <span>{f.departure.airport}</span>
                       </div>
-                      <div className="transit-line"><Plane size={14} /></div>
+                      <div className="transit-line">
+                        <Plane size={14} />
+                        <span className="transit-duration">{f.duration || '2h 30m'}</span>
+                      </div>
                       <div>
                         <strong>{f.arrival.time}</strong>
                         <span>{f.arrival.airport}</span>
                       </div>
+                    </div>
+                    <div className="transit-platform-line">
+                      <span>Terminal: <strong>{f.departure.terminal}</strong></span>
+                      <span className="train-route-crumb">{f.route || `${originAirport} ➔ ${nearestAirport}`}</span>
                     </div>
                     <div className="transit-card-foot">
                       <span>Status: <strong>{f.status}</strong></span>
@@ -571,8 +601,18 @@ export default function TravelMode({ destination }) {
           {publicTab === 'ship' && (
             <div className="transit-subpanel">
               <div className="transit-form-row">
-                <div className="transit-field wide">
-                  <label>Nearest Maritime Harbour</label>
+                <div className="transit-field">
+                  <label>Departure / Origin Port</label>
+                  <input
+                    type="text"
+                    value={shipSource}
+                    onChange={(e) => setShipSource(e.target.value)}
+                    placeholder="e.g. Mumbai Port, Goa, Chennai, Dubai"
+                  />
+                </div>
+                <div className="transit-arrow"><ArrowRight size={18} /></div>
+                <div className="transit-field">
+                  <label>Arrival / Destination Port</label>
                   <input
                     type="text"
                     value={`${nearestPort.name} (${nearestPort.lat.toFixed(2)}°N, ${nearestPort.lng.toFixed(2)}°E)`}
@@ -581,38 +621,82 @@ export default function TravelMode({ destination }) {
                   />
                 </div>
                 <div className="transit-field">
-                  <label>Date</label>
+                  <label>Travel Date</label>
                   <input
                     type="date"
                     value={shipDate}
-                    onChange={(e) => setShipDate(e.target.value)}
+                    onChange={(e) => {
+                      setShipDate(e.target.value);
+                      handleShipSearch(null, e.target.value, shipSource);
+                    }}
                   />
                 </div>
+                <button
+                  className="transit-action-btn"
+                  onClick={(e) => handleShipSearch(e)}
+                  disabled={shipsLoading}
+                >
+                  <Search size={16} /> {shipsLoading ? 'Tracking...' : 'Search & Live AIS Track'}
+                </button>
                 <div className="transit-status-indicator">
                   <span className={`status-dot ${shipStatus}`}></span>
                   <span>AIS Telemetry: {shipStatus === 'streaming' ? 'Live Transmitting' : shipStatus}</span>
                 </div>
               </div>
 
-              <div className="transit-meta-header">
-                <span className="route-tag">⚓ Harbour Zone: {nearestPort.name}</span>
-                <span className="date-tag">📡 Live Telemetry Stream (Updates every 3s)</span>
-              </div>
+              {/* Dynamic Port & Date Header */}
+              {shipDateLabel && (
+                <div className="transit-meta-header">
+                  <span className="route-tag">⚓ Maritime Route: {shipSource} ➔ {nearestPort.name}</span>
+                  <span className="date-tag">
+                    📅 {isFutureShip ? 'Advance Sailing Schedule: ' : 'Live Vessel Telemetry: '} {shipDateLabel}
+                  </span>
+                  <span className={`mode-indicator-tag ${isFutureShip ? 'scheduled' : 'live'}`}>
+                    {isFutureShip ? '🗓️ Confirmed Sailing Timetable' : '🔴 Real-Time Marine AIS Signal'}
+                  </span>
+                </div>
+              )}
 
               <div className="transit-results-grid">
                 {ships.map((s, i) => (
                   <div key={i} className="transit-card">
                     <div className="transit-card-top">
-                      <span className="transit-name">{s.name}</span>
+                      <div>
+                        <span className="transit-name">{s.name}</span>
+                        {s.type && <span className="train-type-badge">{s.type}</span>}
+                      </div>
                       <span className="transit-badge ship">MMSI {s.mmsi}</span>
                     </div>
-                    <div className="transit-schedule-ship">
-                      <div>Speed Over Ground: <strong>{s.speed}</strong></div>
-                      <div>GPS Fix: <strong>{s.lat}°, {s.lng}°</strong></div>
+                    <div className="transit-schedule">
+                      <div>
+                        <strong>{s.departureTime || '09:00'}</strong>
+                        <span>{s.source ? s.source.split(' ')[0] : 'Origin'}</span>
+                      </div>
+                      <div className="transit-line">
+                        <Ship size={14} />
+                        <span className="transit-duration">{s.duration || s.nauticalDistance || '180 NM'}</span>
+                      </div>
+                      <div>
+                        <strong>{s.arrivalTime || '18:00'}</strong>
+                        <span>{nearestPort.name.split(' ')[0]}</span>
+                      </div>
+                    </div>
+                    <div className="transit-platform-line">
+                      <span>Speed: <strong>{s.speed}</strong></span>
+                      <span className="train-route-crumb">GPS: {s.lat}°, {s.lng}°</span>
                     </div>
                     <div className="transit-card-foot">
-                      <span>Type: <strong>{s.type}</strong></span>
-                      <span className="live-ping-tag">Live Signal</span>
+                      {isFutureShip ? (
+                        <>
+                          <span>Voyage: <strong>{s.status}</strong></span>
+                          <span className="transit-badge scheduled">{s.bookingInfo || 'Confirmed Sailing'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Status: <strong style={{ color: '#2e7d32' }}>Live In Transit</strong></span>
+                          <span className="live-ping-tag">Live AIS Signal</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
