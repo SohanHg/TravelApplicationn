@@ -48,11 +48,36 @@ TravelPlanner is an interactive, responsive web application designed for modern 
 ## Architecture Notes
 The application is built primarily as a client-side single-page application (SPA) with no dedicated backend database server required. To support third-party APIs that enforce CORS restrictions, require secret keys, or run HTTP-only free tiers (such as Aviationstack and RailRadar), lightweight serverless proxy functions are organized inside the `/api` directory for deployment on Vercel. Long-lived streaming connections (such as aisstream.io WebSockets) and public endpoints (Overpass, OpenSky, OSRM, Nominatim) run client-side to maintain performance without proxy latency.
 
-## Screenshots
-[Add screenshots here after final deployment]
-
 ## Live Demo
-[Add live deployed link here]
+Experience the live deployed application here:
+🔗 **[https://travel-applicationn-git-main-sohanprojects.vercel.app/](https://travel-applicationn-git-main-sohanprojects.vercel.app/)**
+
+## Screenshots
+*(Add your captured screenshots to a `/screenshots` folder or link them directly below)*
+
+- **1. Hero Section & Video Background**:
+  <!-- ![Hero Section](screenshots/hero-section.png) -->
+  *Full-screen video hero with dynamic streaming and typography.*
+
+- **2. Destination Explorer & Region Filters**:
+  <!-- ![Destination Explorer](screenshots/destination-explorer.png) -->
+  *Search bar, active region pills, and curated destination cards.*
+
+- **3. Destination Detail & Famous Places Carousel**:
+  <!-- ![Famous Places Carousel](screenshots/famous-places.png) -->
+  *Landmark carousel with on-demand Pexels imagery and weather card.*
+
+- **4. Interactive Map with Landmark Photo Popups**:
+  <!-- ![Interactive Map](screenshots/interactive-map.png) -->
+  *Leaflet map showing attraction pins with live photo popups.*
+
+- **5. AI Travel Assistant & Itinerary Planner**:
+  <!-- ![AI Travel Assistant](screenshots/ai-assistant.png) -->
+  *Gemini-powered chat widget and generated day-by-day travel plan.*
+
+- **6. Travel Mode: Multi-Modal Transit & Private Driving Route**:
+  <!-- ![Travel Mode](screenshots/travel-mode.png) -->
+  *Origin-to-destination flight, train, ship AIS, and OSRM turn-by-turn navigation.*
 
 ## Running Locally
 
