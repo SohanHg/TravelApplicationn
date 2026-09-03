@@ -31,7 +31,7 @@ export default function SearchFilterBar({
           <button
             key={region}
             type="button"
-            className={`region-pill ${activeRegion === region ? 'active' : ''}`}
+            className={`region-pill ${!showFavoritesOnly && activeRegion === region ? 'active' : ''}`}
             onClick={() => onRegionChange(region)}
           >
             {region}

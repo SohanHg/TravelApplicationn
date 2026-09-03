@@ -52,6 +52,21 @@ function Home() {
     return matchesSearch && matchesRegion && matchesFavorites;
   });
 
+  const handleRegionChange = (region) => {
+    setActiveRegion(region);
+    setShowFavoritesOnly(false);
+  };
+
+  const handleFavoritesToggle = () => {
+    setShowFavoritesOnly((prev) => {
+      const next = !prev;
+      if (next) {
+        setActiveRegion('All');
+      }
+      return next;
+    });
+  };
+
   return (
     <motion.main
       variants={pageVariants}
@@ -79,9 +94,9 @@ function Home() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           activeRegion={activeRegion}
-          onRegionChange={setActiveRegion}
+          onRegionChange={handleRegionChange}
           showFavoritesOnly={showFavoritesOnly}
-          onFavoritesToggle={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          onFavoritesToggle={handleFavoritesToggle}
           favoritesCount={favorites.length}
         />
         <DestinationGrid
