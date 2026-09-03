@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchNearbyAttractions } from '../../services/overpassAPI';
+import { getDestinationImage } from '../../services/imageAPI';
 import './MapCard.css';
 
 // Fix default marker icon bug
@@ -25,6 +27,48 @@ const attractionIcon = L.divIcon({
   iconSize: [18, 18],
   iconAnchor: [9, 9]
 });
+
+// Rich popup component fetching real landmark image
+function AttractionPopupContent({ attraction, destinationName }) {
+  const [imageUrl, setImageUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const fetchImg = async () => {
+      try {
+        const query = `${attraction.name} ${destinationName}`;
+        const img = await getDestinationImage(query);
+        if (active && img) {
+          setImageUrl(img);
+        }
+      } catch (e) {
+        // Fallback gracefully
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    fetchImg();
+    return () => { active = false; };
+  }, [attraction.name, destinationName]);
+
+  return (
+    <div className="map-attraction-popup">
+      {loading ? (
+        <div className="map-popup-image-skeleton">Loading photo...</div>
+      ) : imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={attraction.name}
+          className="map-popup-image"
+          onError={(e) => { e.target.style.display = 'none'; }}
+        />
+      ) : null}
+      <h4 className="map-popup-title">{attraction.name}</h4>
+      <span className="map-popup-type">{attraction.type}</span>
+    </div>
+  );
+}
 
 const MapCard = ({ lat, lng, destinationName, famousPlaces = [], attractions: initialAttractions = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -82,13 +126,20 @@ const MapCard = ({ lat, lng, destinationName, famousPlaces = [], attractions: in
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Marker position={[lat, lng]}>
-        <Popup>{destinationName}</Popup>
+        <Popup>
+          <AttractionPopupContent
+            attraction={{ name: destinationName, type: 'Destination Center' }}
+            destinationName={destinationName}
+          />
+        </Popup>
       </Marker>
       {attractions.map(attr => (
         <Marker key={attr.id} position={[attr.lat, attr.lng]} icon={attractionIcon}>
           <Popup>
-            <strong>{attr.name}</strong><br/>
-            {attr.type}
+            <AttractionPopupContent
+              attraction={attr}
+              destinationName={destinationName}
+            />
           </Popup>
         </Marker>
       ))}
@@ -121,10 +172,11 @@ const MapCard = ({ lat, lng, destinationName, famousPlaces = [], attractions: in
         </div>
       </div>
 
-      <AnimatePresence>
-        {isExpanded && (
+      {isExpanded && typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
           <motion.div 
             className="map-modal-backdrop"
+            style={{ zIndex: 99999 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -132,6 +184,7 @@ const MapCard = ({ lat, lng, destinationName, famousPlaces = [], attractions: in
           >
             <motion.div 
               className="map-modal-content"
+              style={{ zIndex: 100000 }}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -144,11 +197,12 @@ const MapCard = ({ lat, lng, destinationName, famousPlaces = [], attractions: in
               >
                 &times;
               </button>
-              <MapContent zoom={11} />
+              <MapContent zoom={12} />
             </motion.div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 };
