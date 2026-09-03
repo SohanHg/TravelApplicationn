@@ -74,24 +74,6 @@ Experience the live deployed application here:
 *Origin-to-destination flight, train, ship AIS, and turn-by-turn road navigation.*
 ![Travel Mode](screenshots/travel-mode.png)
 
-## Running Locally
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/SohanHg/TravelApplicationn.git
-   cd TravelApplicationn
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**:
-   Copy `.env.example` to `.env` and supply your API keys:
-   ```bash
-   cp .env.example .env
-   ```
    *Note: Client-side keys must be prefixed with `VITE_` (`VITE_OPENWEATHER_KEY`, `VITE_PEXELS_KEY`, `VITE_GEMINI_KEY`, `VITE_AISSTREAM_KEY`). Server-side proxy keys (`AVIATIONSTACK_KEY`, `RAILRADAR_KEY`) are read by `/api` serverless handlers.*
 
 4. **Run the development server**:
