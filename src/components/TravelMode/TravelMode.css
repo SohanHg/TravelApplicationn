@@ -346,6 +346,31 @@
   color: var(--color-ink);
 }
 
+.transit-badge.scheduled {
+  background: rgba(33, 150, 243, 0.12);
+  color: #0288d1;
+  font-weight: 600;
+}
+
+.mode-indicator-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.mode-indicator-tag.scheduled {
+  background: #e3f2fd;
+  color: #0277bd;
+  border: 1px solid #bbdefb;
+}
+
+.mode-indicator-tag.live {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
 .transit-schedule {
   display: flex;
   justify-content: space-between;

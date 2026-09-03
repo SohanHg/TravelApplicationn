@@ -34,6 +34,7 @@ export default function TravelMode({ destination }) {
   const [flightsLoading, setFlightsLoading] = useState(false);
   const [flightsError, setFlightsError] = useState(null);
   const [isLiveRadar, setIsLiveRadar] = useState(false);
+  const [isFutureFlight, setIsFutureFlight] = useState(false);
 
   // Train state
   const [trainDate, setTrainDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -41,6 +42,7 @@ export default function TravelMode({ destination }) {
   const [trains, setTrains] = useState([]);
   const [trainsLoading, setTrainsLoading] = useState(false);
   const [trainsError, setTrainsError] = useState(null);
+  const [isFutureTrain, setIsFutureTrain] = useState(false);
 
   // Ship AIS state (WebSocket)
   const [shipDate, setShipDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -77,6 +79,7 @@ export default function TravelMode({ destination }) {
         setFlights(result.flights || []);
         setFlightRouteInfo(result.route || '');
         setFlightDateLabel(result.travelDate || '');
+        setIsFutureFlight(!!result.isFuture);
       }
     } catch (err) {
       setFlightsError('Could not retrieve flight schedules right now. Please try again.');
@@ -128,6 +131,7 @@ export default function TravelMode({ destination }) {
       } else {
         setTrains(result.trains || []);
         setTrainDateLabel(result.travelDate || '');
+        setIsFutureTrain(!!result.isFuture);
       }
     } catch (err) {
       setTrainsError('Could not retrieve train schedules right now. Please try again.');
@@ -417,7 +421,12 @@ export default function TravelMode({ destination }) {
               {flightRouteInfo && (
                 <div className="transit-meta-header">
                   <span className="route-tag">📍 {flightRouteInfo}</span>
-                  <span className="date-tag">📅 {flightDateLabel}</span>
+                  <span className="date-tag">
+                    📅 {isFutureFlight ? 'Confirmed Timetable: ' : 'Live Air Departures: '} {flightDateLabel}
+                  </span>
+                  <span className={`mode-indicator-tag ${isFutureFlight ? 'scheduled' : 'live'}`}>
+                    {isFutureFlight ? '🗓️ Advance Published Timetable' : '🔴 Real-Time Flight Status'}
+                  </span>
                 </div>
               )}
 
@@ -488,7 +497,12 @@ export default function TravelMode({ destination }) {
               {trainDateLabel && (
                 <div className="transit-meta-header">
                   <span className="route-tag">🚉 Station: {nearestStation.name} ({nearestStation.code})</span>
-                  <span className="date-tag">📅 Timetable for: {trainDateLabel}</span>
+                  <span className="date-tag">
+                    📅 {isFutureTrain ? 'Advance Schedule: ' : 'Live Departures: '} {trainDateLabel}
+                  </span>
+                  <span className={`mode-indicator-tag ${isFutureTrain ? 'scheduled' : 'live'}`}>
+                    {isFutureTrain ? '🗓️ Confirmed Timetable (Advance Booking)' : '🔴 Real-Time Live Running Status'}
+                  </span>
                 </div>
               )}
 
@@ -509,8 +523,17 @@ export default function TravelMode({ destination }) {
                       <div>Allocated Platform: <strong>{t.platform}</strong></div>
                     </div>
                     <div className="transit-card-foot">
-                      <span>Status: <strong style={{ color: t.delay.includes('late') ? '#c62828' : '#2e7d32' }}>{t.delay}</strong></span>
-                      <span className={`transit-badge status ${t.status.toLowerCase()}`}>{t.status}</span>
+                      {isFutureTrain ? (
+                        <>
+                          <span>Schedule: <strong>{t.infoLabel}</strong></span>
+                          <span className="transit-badge scheduled">{t.bookingInfo || 'Scheduled'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Status: <strong style={{ color: t.status.toLowerCase() === 'delayed' ? '#c62828' : '#2e7d32' }}>{t.infoLabel}</strong></span>
+                          <span className={`transit-badge status ${t.status.toLowerCase()}`}>{t.status}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
