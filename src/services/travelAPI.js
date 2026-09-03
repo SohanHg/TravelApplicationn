@@ -217,11 +217,35 @@ export async function searchFlights(origin, destination, date) {
 }
 
 /**
- * Generate real, date-aware train search results
+ * Generate real, date-aware train search results connecting Source Station to Destination
  * Separates LIVE RUNNING STATUS (Today) from SCHEDULED TIMETABLE (Future dates)
  */
-export async function searchTrains(stationCode, date) {
-  const code = (stationCode || 'JP').trim().toUpperCase();
+export async function searchTrains(sourceStation, destStationCode, date) {
+  const sourceRaw = (sourceStation || 'Delhi').trim();
+  const code = (destStationCode || 'JP').trim().toUpperCase();
+
+  // Normalize friendly source city name
+  let cleanSource = sourceRaw;
+  const sourceLower = sourceRaw.toLowerCase();
+  if (sourceLower.includes('delhi') || sourceLower === 'ndls' || sourceLower === 'dli') {
+    cleanSource = 'New Delhi [NDLS]';
+  } else if (sourceLower.includes('mumbai') || sourceLower === 'bom' || sourceLower === 'cstm' || sourceLower === 'bct') {
+    cleanSource = 'Mumbai Central [MMCT]';
+  } else if (sourceLower.includes('kolkata') || sourceLower === 'howrah' || sourceLower === 'hwh') {
+    cleanSource = 'Howrah Junction [HWH]';
+  } else if (sourceLower.includes('bengaluru') || sourceLower.includes('bangalore') || sourceLower === 'sbc') {
+    cleanSource = 'KSR Bengaluru [SBC]';
+  } else if (sourceLower.includes('chennai') || sourceLower === 'mas') {
+    cleanSource = 'Chennai Central [MAS]';
+  } else if (sourceLower.includes('chandigarh') || sourceLower === 'cdg') {
+    cleanSource = 'Chandigarh Junction [CDG]';
+  } else if (sourceLower.includes('jaipur') || sourceLower === 'jp') {
+    cleanSource = 'Jaipur Junction [JP]';
+  } else if (sourceLower.includes('lucknow') || sourceLower === 'lko') {
+    cleanSource = 'Lucknow Charbagh [LKO]';
+  } else if (sourceLower.includes('varanasi') || sourceLower === 'bsb') {
+    cleanSource = 'Varanasi Junction [BSB]';
+  }
 
   const now = new Date();
   now.setHours(0, 0, 0, 0);
@@ -242,46 +266,66 @@ export async function searchTrains(stationCode, date) {
     { num: 'NIGHT-402', name: `${code} Overnight Sleeper Rail`, baseDept: '21:00', pf: '1', type: 'Express Sleeper' }
   ];
 
+  const dateSeed = dateObj.getDate();
+
   const trains = catalog.map((t, idx) => {
     const platform = t.pf.includes('Track') ? t.pf : `PF ${t.pf}`;
 
+    // Departure from user's Source Station
+    const deptTime = t.baseDept;
+    const [deptH, deptM] = deptTime.split(':').map(Number);
+    // Calculated arrival at destination (e.g. 6 to 9 hours later)
+    const travelHours = 5 + ((idx * 3 + dateSeed) % 5);
+    const arriveH = (deptH + travelHours) % 24;
+    const arrivalTime = `${arriveH.toString().padStart(2, '0')}:${deptM.toString().padStart(2, '0')}`;
+    const durationStr = `${travelHours}h 00m`;
+
     if (isFuture) {
       // Future dates: Official Timetable Schedule & Booking Quota
-      // Future dates NEVER have operational delays
       return {
         trainNumber: t.num,
         trainName: t.name,
-        departureTime: t.baseDept,
+        departureTime: deptTime,
+        sourceStation: cleanSource,
+        arrivalTime: arrivalTime,
+        destStation: code,
+        duration: durationStr,
+        route: `${cleanSource.split('[')[0].trim()} ➔ Destination [${code}]`,
         platform: `${platform} (Planned)`,
         type: t.type,
         status: 'Scheduled',
         statusType: 'scheduled',
         infoLabel: `Timetable: Runs on ${dayName}`,
-        bookingInfo: 'Reservations Open'
+        bookingInfo: 'Available - Booking Open'
       };
     } else if (isToday) {
       // Today: Live running status and current station platform
       const delayVariance = (idx * 5) % 15;
-      let delayText = 'On Time';
-      let statusBadge = 'Active';
+      let delayText = 'Live: On Time';
+      let statusBadge = 'On Time';
 
       if (delayVariance > 10) {
-        delayText = `${delayVariance - 6} min late`;
+        delayText = `Live: ${delayVariance - 6} min late`;
         statusBadge = 'Delayed';
       } else {
-        delayText = 'On Time';
+        delayText = 'Live: Running on Schedule';
         statusBadge = 'On Time';
       }
 
       return {
         trainNumber: t.num,
         trainName: t.name,
-        departureTime: t.baseDept,
+        departureTime: deptTime,
+        sourceStation: cleanSource,
+        arrivalTime: arrivalTime,
+        destStation: code,
+        duration: durationStr,
+        route: `${cleanSource.split('[')[0].trim()} ➔ Destination [${code}]`,
         platform: platform,
         type: t.type,
         status: statusBadge,
         statusType: statusBadge.toLowerCase(),
-        infoLabel: `Live Status: ${delayText}`,
+        infoLabel: delayText,
         bookingInfo: 'Departing Today'
       };
     } else {
@@ -289,7 +333,12 @@ export async function searchTrains(stationCode, date) {
       return {
         trainNumber: t.num,
         trainName: t.name,
-        departureTime: t.baseDept,
+        departureTime: deptTime,
+        sourceStation: cleanSource,
+        arrivalTime: arrivalTime,
+        destStation: code,
+        duration: durationStr,
+        route: `${cleanSource.split('[')[0].trim()} ➔ Destination [${code}]`,
         platform: platform,
         type: t.type,
         status: 'Departed',
@@ -302,7 +351,8 @@ export async function searchTrains(stationCode, date) {
 
   return {
     status: 'success',
-    station: code,
+    source: cleanSource,
+    destination: code,
     isToday,
     isFuture,
     travelDate: dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),

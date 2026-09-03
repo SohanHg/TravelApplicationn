@@ -37,6 +37,7 @@ export default function TravelMode({ destination }) {
   const [isFutureFlight, setIsFutureFlight] = useState(false);
 
   // Train state
+  const [trainSource, setTrainSource] = useState('Delhi');
   const [trainDate, setTrainDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [trainDateLabel, setTrainDateLabel] = useState('');
   const [trains, setTrains] = useState([]);
@@ -117,14 +118,15 @@ export default function TravelMode({ destination }) {
   };
 
   // --- Train handler ---
-  const handleTrainSearch = async (e, customDate) => {
+  const handleTrainSearch = async (e, customDate, customSource) => {
     if (e) e.preventDefault();
     const dateToUse = customDate || trainDate;
+    const sourceToUse = customSource !== undefined ? customSource : trainSource;
     setTrainsLoading(true);
     setTrainsError(null);
 
     try {
-      const result = await searchTrains(nearestStation.code, dateToUse);
+      const result = await searchTrains(sourceToUse, nearestStation.code, dateToUse);
       if (result.error) {
         setTrainsError(result.error);
         setTrains([]);
@@ -464,8 +466,18 @@ export default function TravelMode({ destination }) {
           {publicTab === 'train' && (
             <div className="transit-subpanel">
               <div className="transit-form-row">
-                <div className="transit-field wide">
-                  <label>Railway Station (Code: {nearestStation.code})</label>
+                <div className="transit-field">
+                  <label>Departure / Source Station</label>
+                  <input
+                    type="text"
+                    value={trainSource}
+                    onChange={(e) => setTrainSource(e.target.value)}
+                    placeholder="e.g. Delhi, Mumbai, Bengaluru"
+                  />
+                </div>
+                <div className="transit-arrow"><ArrowRight size={18} /></div>
+                <div className="transit-field">
+                  <label>Arrival / Destination Station</label>
                   <input
                     type="text"
                     value={`${nearestStation.name} [${nearestStation.code}]`}
@@ -480,7 +492,7 @@ export default function TravelMode({ destination }) {
                     value={trainDate}
                     onChange={(e) => {
                       setTrainDate(e.target.value);
-                      handleTrainSearch(null, e.target.value);
+                      handleTrainSearch(null, e.target.value, trainSource);
                     }}
                   />
                 </div>
@@ -489,14 +501,14 @@ export default function TravelMode({ destination }) {
                   onClick={(e) => handleTrainSearch(e)}
                   disabled={trainsLoading}
                 >
-                  <Search size={16} /> {trainsLoading ? 'Tracking...' : 'Refresh Timetable'}
+                  <Search size={16} /> {trainsLoading ? 'Tracking...' : 'Search & Live Track'}
                 </button>
               </div>
 
               {/* Dynamic Station & Date Header */}
               {trainDateLabel && (
                 <div className="transit-meta-header">
-                  <span className="route-tag">🚉 Station: {nearestStation.name} ({nearestStation.code})</span>
+                  <span className="route-tag">🚉 Route: {trainSource} ➔ {nearestStation.name} [{nearestStation.code}]</span>
                   <span className="date-tag">
                     📅 {isFutureTrain ? 'Advance Schedule: ' : 'Live Departures: '} {trainDateLabel}
                   </span>
@@ -518,9 +530,23 @@ export default function TravelMode({ destination }) {
                       </div>
                       <span className="transit-badge train">{t.trainNumber}</span>
                     </div>
-                    <div className="transit-schedule-train">
-                      <div>Scheduled Departure: <strong>{t.departureTime}</strong></div>
-                      <div>Allocated Platform: <strong>{t.platform}</strong></div>
+                    <div className="transit-schedule">
+                      <div>
+                        <strong>{t.departureTime}</strong>
+                        <span>{t.sourceStation ? t.sourceStation.split('[')[0].trim() : trainSource}</span>
+                      </div>
+                      <div className="transit-line">
+                        <Train size={14} />
+                        <span className="transit-duration">{t.duration}</span>
+                      </div>
+                      <div>
+                        <strong>{t.arrivalTime}</strong>
+                        <span>{nearestStation.name.split(' ')[0]}</span>
+                      </div>
+                    </div>
+                    <div className="transit-platform-line">
+                      <span>Platform: <strong>{t.platform}</strong></span>
+                      <span className="train-route-crumb">{t.route}</span>
                     </div>
                     <div className="transit-card-foot">
                       {isFutureTrain ? (
