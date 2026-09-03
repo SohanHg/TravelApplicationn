@@ -484,7 +484,7 @@ export default function TravelMode({ destination }) {
                     </div>
                     <div className="transit-card-foot">
                       <span>Status: <strong>{f.status}</strong></span>
-                      {f.priceEstimate && <span className="transit-price">{f.priceEstimate}</span>}
+                      <span className="transit-badge scheduled">{f.serviceType || 'Commercial Transit'}</span>
                     </div>
                   </div>
                 ))}

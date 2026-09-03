@@ -439,12 +439,6 @@
   color: var(--color-muted);
 }
 
-.transit-price {
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--color-accent);
-}
-
 .transit-alert {
   padding: 12px 16px;
   border-radius: var(--radius-card);

@@ -28,7 +28,7 @@ export default async function handler(req, res) {
           departure: { airport: origin || 'DEL', time: '08:30', terminal: 'T3' },
           arrival: { airport: destination, time: '10:15', terminal: 'T1' },
           status: 'Scheduled',
-          priceEstimate: '$120'
+          serviceType: 'Commercial Transit'
         },
         {
           flightNumber: '6E 214',
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
           departure: { airport: origin || 'BOM', time: '14:45', terminal: 'T2' },
           arrival: { airport: destination, time: '16:30', terminal: 'T1' },
           status: 'Active',
-          priceEstimate: '$95'
+          serviceType: 'Non-Stop Direct'
         }
       ]
     });

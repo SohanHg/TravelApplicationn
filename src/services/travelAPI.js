@@ -118,7 +118,7 @@ export async function fetchLiveAirTraffic(lat, lng) {
         departure: { airport: 'AIR', time: 'En Route', terminal: '-' },
         arrival: { airport: 'DEST', time: 'In Air', terminal: '-' },
         status: `${altitudeFt.toLocaleString()} ft · ${speedKnots} kts`,
-        priceEstimate: 'Live Airborne Telemetry'
+        serviceType: 'Live Airborne Radar'
       };
     });
   } catch (err) {
@@ -215,9 +215,6 @@ export async function searchFlights(originQuery, destination, date) {
   const destInfo = AIRPORT_INFO[arrCode] || { city: arrCode, country: 'Destination', airlines: ['International Air'] };
   const airlines = destInfo.airlines || ['Global Airlines', 'Star Carrier', 'Sky Express'];
 
-  const dateSeed = dateObj.getDate();
-  const basePrice = 75 + (dateSeed * 7) % 120;
-
   const flights = [
     {
       flightNumber: `${depCode.slice(0, 2)} 102`,
@@ -228,7 +225,7 @@ export async function searchFlights(originQuery, destination, date) {
       route: `${originResolved.display} ➔ ${arrCode}`,
       status: isFuture ? `Confirmed Schedule (${dayName})` : 'Live: On Time',
       statusType: isFuture ? 'scheduled' : 'active',
-      priceEstimate: `$${basePrice}`
+      serviceType: 'Commercial Non-Stop'
     },
     {
       flightNumber: `${arrCode.slice(0, 2)} 245`,
@@ -239,7 +236,7 @@ export async function searchFlights(originQuery, destination, date) {
       route: `${originResolved.display} ➔ ${arrCode}`,
       status: isFuture ? 'Operates Daily' : 'Live: Boarding',
       statusType: isFuture ? 'scheduled' : 'active',
-      priceEstimate: `$${basePrice + 20}`
+      serviceType: 'Daily Direct'
     },
     {
       flightNumber: `${airlines[0].slice(0, 2).toUpperCase()} 380`,
@@ -250,7 +247,7 @@ export async function searchFlights(originQuery, destination, date) {
       route: `${originResolved.display} ➔ ${arrCode}`,
       status: isFuture ? `Runs on ${dayName}` : 'Live: Scheduled',
       statusType: isFuture ? 'scheduled' : 'active',
-      priceEstimate: `$${basePrice + 15}`
+      serviceType: 'Fastest Service'
     },
     {
       flightNumber: `${depCode.slice(0, 2)} 490`,
@@ -261,7 +258,7 @@ export async function searchFlights(originQuery, destination, date) {
       route: `${originResolved.display} ➔ ${arrCode}`,
       status: isFuture ? 'Non-Stop Direct' : 'Live: Gate Open',
       statusType: isFuture ? 'scheduled' : 'active',
-      priceEstimate: `$${basePrice - 10}`
+      serviceType: 'Evening Transit'
     }
   ];
 
