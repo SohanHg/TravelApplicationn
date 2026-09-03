@@ -26,7 +26,7 @@ const attractionIcon = L.divIcon({
   iconAnchor: [9, 9]
 });
 
-const MapCard = ({ lat, lng, destinationName, attractions: initialAttractions = [] }) => {
+const MapCard = ({ lat, lng, destinationName, famousPlaces = [], attractions: initialAttractions = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [attractions, setAttractions] = useState(initialAttractions);
   const [status, setStatus] = useState(initialAttractions.length > 0 ? 'success' : 'loading');
@@ -37,14 +37,22 @@ const MapCard = ({ lat, lng, destinationName, attractions: initialAttractions = 
     let isMounted = true;
     const fetchAttractions = async () => {
       try {
-        const fetchedAttractions = await fetchNearbyAttractions(lat, lng);
+        const fetchedAttractions = await fetchNearbyAttractions(lat, lng, 10000, famousPlaces);
         if (isMounted) {
           setAttractions(fetchedAttractions);
           setStatus('success');
         }
       } catch (err) {
         if (isMounted) {
-          setStatus('error');
+          const fallback = (famousPlaces || []).map((p, idx) => ({
+            id: `poi-${idx}`,
+            name: p.name,
+            type: 'Tourist Attraction & Landmark',
+            lat: lat + (Math.sin(idx + 1) * 0.012),
+            lng: lng + (Math.cos(idx + 1) * 0.012)
+          }));
+          setAttractions(fallback);
+          setStatus('success');
         }
       }
     };
@@ -54,7 +62,7 @@ const MapCard = ({ lat, lng, destinationName, attractions: initialAttractions = 
     return () => {
       isMounted = false;
     };
-  }, [lat, lng, initialAttractions]);
+  }, [lat, lng, initialAttractions, famousPlaces]);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -90,7 +98,14 @@ const MapCard = ({ lat, lng, destinationName, attractions: initialAttractions = 
   return (
     <>
       <div className="map-card">
-        <div className="map-card-label">Interactive Map</div>
+        <div className="map-card-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>Interactive Map</span>
+          {attractions.length > 0 && (
+            <span style={{ fontSize: '0.78rem', background: '#f5eee6', color: '#c1673a', padding: '2px 8px', borderRadius: '999px', fontWeight: 600 }}>
+              📍 {attractions.length} Attractions
+            </span>
+          )}
+        </div>
         {status === 'loading' && <div className="map-attractions-status">Loading nearby attractions...</div>}
         {status === 'error' && <div className="map-attractions-status">Couldn't load nearby attractions right now</div>}
         

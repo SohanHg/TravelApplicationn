@@ -345,9 +345,14 @@ export default function TravelMode({ destination }) {
     <section className="travel-mode-section">
       <div className="travel-mode-header">
         <div>
-          <span className="travel-mode-badge">Phase 16 Transit & Navigation</span>
-          <h2 className="travel-mode-title">Travel Mode: Route & Connections</h2>
-          <p className="travel-mode-subtitle">Real-time public transit schedules & turn-by-turn road navigation to {destination.name}.</p>
+          <h2 className="travel-mode-title">
+            Travel Mode: {activeMode === 'private' ? 'Private' : 'Public'}
+          </h2>
+          <p className="travel-mode-subtitle">
+            {activeMode === 'private'
+              ? `Turn-by-turn road navigation and driving directions to ${destination.name}.`
+              : `Real-time public transit schedules, flight radar, and railway timetables to ${destination.name}.`}
+          </p>
         </div>
 
         {/* Mode Selector Toggle */}

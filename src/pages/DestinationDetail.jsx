@@ -169,6 +169,7 @@ function DestinationDetail() {
                 lat={destination.lat}
                 lng={destination.lng}
                 destinationName={destination.name}
+                famousPlaces={destination.famousPlaces}
               />
             </div>
           </motion.aside>
