@@ -190,6 +190,68 @@
   opacity: 0.9;
 }
 
+.transit-radar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-card);
+  padding: 11px 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  height: 42px;
+  transition: all 0.2s ease;
+}
+
+.transit-radar-btn:hover {
+  background: rgba(193, 103, 58, 0.08);
+}
+
+.transit-radar-btn.active {
+  background: var(--color-accent);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(193, 103, 58, 0.5);
+}
+
+.transit-meta-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.route-tag,
+.date-tag {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+}
+
+.train-type-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.live-ping-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
 .transit-caption {
   font-size: 0.82rem;
   color: var(--color-muted);
