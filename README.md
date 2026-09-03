@@ -75,9 +75,3 @@ Experience the live deployed application here:
 ![Travel Mode](screenshots/travel-mode.png)
 
    *Note: Client-side keys must be prefixed with `VITE_` (`VITE_OPENWEATHER_KEY`, `VITE_PEXELS_KEY`, `VITE_GEMINI_KEY`, `VITE_AISSTREAM_KEY`). Server-side proxy keys (`AVIATIONSTACK_KEY`, `RAILRADAR_KEY`) are read by `/api` serverless handlers.*
-
-4. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
-   Open your browser to `http://localhost:5173/`.
