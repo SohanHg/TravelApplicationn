@@ -1,0 +1,114 @@
+.famous-places-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 -8px;
+}
+
+.famous-places-scroll {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px;
+  width: 100%;
+  scrollbar-width: none;
+}
+
+.famous-places-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  color: var(--color-ink);
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.carousel-arrow:hover {
+  background-color: var(--color-canvas);
+}
+
+.left-arrow {
+  left: 16px;
+}
+
+.right-arrow {
+  right: 16px;
+}
+
+@media (max-width: 768px) {
+  .carousel-arrow {
+    display: none;
+  }
+}
+
+.famous-place-card {
+  min-width: 280px;
+  max-width: 320px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.famous-place-image-wrapper {
+  height: 180px;
+  width: 100%;
+  background-color: var(--color-border);
+}
+
+.famous-place-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.famous-place-skeleton,
+.famous-place-fallback {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-border);
+}
+
+.famous-place-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.famous-place-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  margin: 0 0 8px 0;
+  color: var(--color-ink);
+}
+
+.famous-place-blurb {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin: 0;
+  line-height: 1.5;
+}

@@ -1,0 +1,16 @@
+:root {
+  --color-canvas: #FAF7F2;
+  --color-ink: #10241E;
+  --color-muted: #6B6259;
+  --color-accent: #C1673A;
+  --color-surface: #FFFFFF;
+  --color-border: #E4DED4;
+
+  --font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+
+  --radius-card: 12px;
+  --radius-pill: 999px;
+  --section-gap: 96px;
+  --page-max-width: 1240px;
+}

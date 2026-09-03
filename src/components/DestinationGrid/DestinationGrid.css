@@ -1,0 +1,37 @@
+.destination-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.destination-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px;
+  text-align: center;
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.destination-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.destination-empty-title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  color: var(--color-ink);
+  margin: 0 0 8px 0;
+}
+
+.destination-empty-subtext {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-muted);
+  margin: 0;
+}

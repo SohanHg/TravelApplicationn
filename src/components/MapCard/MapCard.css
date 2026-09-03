@@ -1,0 +1,89 @@
+.map-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  position: relative;
+}
+
+.map-card-label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  padding: 12px 16px;
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.map-card .leaflet-container {
+  height: 320px;
+  width: 100%;
+}
+
+.map-expand-btn {
+  position: absolute;
+  top: 56px;
+  right: 12px;
+  z-index: 1000;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--color-ink);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.map-expand-btn:hover {
+  background: var(--color-canvas);
+}
+
+.map-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-modal-content {
+  width: 90vw;
+  height: 85vh;
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  position: relative;
+}
+
+.map-modal-content .leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+.map-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2001;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--color-ink);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.map-attractions-status {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  text-align: center;
+}
