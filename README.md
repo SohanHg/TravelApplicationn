@@ -53,31 +53,26 @@ Experience the live deployed application here:
 🔗 **[https://travel-applicationn-git-main-sohanprojects.vercel.app/](https://travel-applicationn-git-main-sohanprojects.vercel.app/)**
 
 ## Screenshots
-*(Add your captured screenshots to a `/screenshots` folder or link them directly below)*
 
-- **1. Hero Section & Video Background**:
-  <!-- ![Hero Section](screenshots/hero-section.png) -->
-  *Full-screen video hero with dynamic streaming and typography.*
+### 1. Hero Section & Dynamic Video Background
+*Full-viewport hero with dynamic streaming travel video, serif typography, and live utility triggers.*
+![Hero Section](screenshots/hero-section.png)
 
-- **2. Destination Explorer & Region Filters**:
-  <!-- ![Destination Explorer](screenshots/destination-explorer.png) -->
-  *Search bar, active region pills, and curated destination cards.*
+### 2. Destination Explorer & Region Filters
+*Curated 12-destination explorer grid with real-time text search, region filters, and favorites.*
+![Destination Explorer](screenshots/destination-explorer.png)
 
-- **3. Destination Detail & Famous Places Carousel**:
-  <!-- ![Famous Places Carousel](screenshots/famous-places.png) -->
-  *Landmark carousel with on-demand Pexels imagery and weather card.*
+### 3. Destination Detail & Live Weather
+*Rich destination overview, best time to visit, and real-time atmospheric conditions.*
+![Destination Detail](screenshots/destination-detail.png)
 
-- **4. Interactive Map with Landmark Photo Popups**:
-  <!-- ![Interactive Map](screenshots/interactive-map.png) -->
-  *Leaflet map showing attraction pins with live photo popups.*
+### 4. AI Travel Assistant & Itinerary Planner
+*Conversational Gemini-powered assistant generating custom day-by-day travel itineraries.*
+![AI Travel Assistant](screenshots/ai-assistant.png)
 
-- **5. AI Travel Assistant & Itinerary Planner**:
-  <!-- ![AI Travel Assistant](screenshots/ai-assistant.png) -->
-  *Gemini-powered chat widget and generated day-by-day travel plan.*
-
-- **6. Travel Mode: Multi-Modal Transit & Private Driving Route**:
-  <!-- ![Travel Mode](screenshots/travel-mode.png) -->
-  *Origin-to-destination flight, train, ship AIS, and OSRM turn-by-turn navigation.*
+### 5. Travel Mode: Multi-Modal Transit & Routing
+*Origin-to-destination flight, train, ship AIS, and turn-by-turn road navigation.*
+![Travel Mode](screenshots/travel-mode.png)
 
 ## Running Locally
 
